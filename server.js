@@ -5,28 +5,28 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 
-/* =========================
-   BASIC SETUP
-========================= */
 dotenv.config();
 const app = express();
 
+// Fix __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 /* =========================
    AI WEBSITE GENERATOR
-   (OpenRouter + DeepSeek R1T Chimera)
 ========================= */
 app.post("/generate", async (req, res) => {
   const { prompt } = req.body;
 
   if (!prompt) {
-    return res.status(400).json({ error: "Prompt is required" });
+    return res.json({
+      html: "<h1>Please enter a prompt</h1>"
+    });
   }
 
   try {
@@ -38,7 +38,7 @@ app.post("/generate", async (req, res) => {
           {
             role: "system",
             content:
-              "You are an expert web designer. Generate a complete, modern, responsive website using HTML and CSS only. Use embedded <style>. Output ONLY valid HTML. Do not explain."
+              "You are an expert web designer. Generate a complete modern SaaS landing page using ONLY HTML and CSS. Use <style> inside HTML. Return ONLY valid HTML. No explanation."
           },
           {
             role: "user",
@@ -50,20 +50,25 @@ app.post("/generate", async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer " + process.env.OPENROUTER_API_KEY,
-          "HTTP-Referer": "http://localhost:3000",
+          Authorization: "Bearer " + process.env.OPENROUTER_API_KEY,
+          "HTTP-Referer": "https://example.com",
           "X-Title": "AI Website Builder"
         }
       }
     );
 
+    const html =
+      response?.data?.choices?.[0]?.message?.content;
+
     res.json({
-      html: response.data.choices[0].message.content
+      html: html || "<h1>AI returned no content</h1>"
     });
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({
-      error: "AI generation failed"
+    console.error("AI ERROR:", error.message);
+
+    res.json({
+      html:
+        "<h1>Error generating website</h1><p>Check API key or rate limit.</p>"
     });
   }
 });
