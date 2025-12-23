@@ -27,7 +27,7 @@ body {
 
 textarea {
   width: 100%;
-  height: 120px;
+  height: 140px;
   border-radius: 10px;
   border: none;
   padding: 14px;
@@ -59,13 +59,18 @@ iframe {
 <div class="container">
 
 <h1>🤖 AI Website Builder</h1>
-<p>Describe the website you want. AI will generate it.</p>
+<p>Describe the website you want. Multiple AI models will be used automatically.</p>
 
 <div class="card">
-  <textarea
-    id="prompt"
-    placeholder="Create a modern SaaS landing page with hero, features and pricing">
-  </textarea>
+  <textarea id="prompt" placeholder="
+Create a modern SaaS landing page with:
+- Hero section
+- Features
+- Pricing
+- Call to action
+Use dark theme and clean typography.
+"></textarea>
+
   <button onclick="generate()">Generate Website</button>
 </div>
 
@@ -81,7 +86,8 @@ async function generate() {
   const prompt = document.getElementById("prompt").value;
   const iframe = document.getElementById("preview");
 
-  iframe.srcdoc = "<h2 style='padding:20px'>Generating website...</h2>";
+  iframe.srcdoc =
+    "<h2 style='padding:20px'>Generating website… Trying multiple AI models.</h2>";
 
   const res = await fetch("/generate", {
     method: "POST",
